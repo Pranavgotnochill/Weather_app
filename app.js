@@ -10,6 +10,70 @@ const humidity = document.getElementById('humidity');
 const windSpeed = document.getElementById('wind-speed');
 const pressure = document.getElementById('pressure');
 
+// Function to get user's current location
+function getCurrentLocation() {
+    // Show loading state
+    updateUI('Detecting your location...', '--', '--', '--', '--', '--');
+    
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                // Get weather for current location
+                getWeatherByCoordinates(latitude, longitude);
+            },
+            (error) => {
+                console.error('Error getting location:', error);
+                alert('Unable to retrieve your location. Please enable location services and try again.');
+            }
+        );
+    } else {
+        alert('Geolocation is not supported by your browser.');
+    }
+}
+
+// Get weather by coordinates
+async function getWeatherByCoordinates(lat, lon) {
+    try {
+        updateUI('Loading...', '--', '--', '--', '--', '--');
+        
+        // Get location name using reverse geocoding
+        const locationResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=en&count=1`);
+        const locationData = await locationResponse.json();
+        const name = locationData.results?.[0]?.name || 'Current Location';
+        const country = locationData.results?.[0]?.country_code || '';
+        
+        // Get weather data
+        const response = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m,surface_pressure&temperature_unit=celsius&windspeed_unit=kmh&timezone=auto`
+        );
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch weather data. Please try again.');
+        }
+        
+        const data = await response.json();
+        const current = data.current_weather;
+        const weatherDesc = weatherCodes[current.weathercode] || 'Unknown';
+        const humidity = data.hourly.relativehumidity_2m[0];
+        const pressureHpa = Math.round(data.hourly.surface_pressure[0]);
+        
+        updateUI(
+            `${name}${country ? ', ' + country : ''}`,
+            Math.round(current.temperature * 10) / 10,
+            weatherDesc,
+            humidity,
+            Math.round(current.windspeed),
+            pressureHpa
+        );
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error getting weather data. Please try again.');
+        updateUI('--', '--', '--', '--', '--', '--');
+    }
+}
+
 // Add event listeners with touch support
 searchBtn.addEventListener('touchstart', () => {
     searchBtn.style.transform = 'scale(0.95)';
@@ -27,6 +91,18 @@ cityInput.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
         searchWeather();
     }
+});
+
+// Location button click handler
+document.getElementById('location-btn').addEventListener('click', getCurrentLocation);
+
+// Initialize with user's location if allowed
+window.addEventListener('load', () => {
+    // Show a loading message
+    updateUI('Detecting your location...', '--', '--', '--', '--', '--');
+    
+    // Try to get user's location
+    getCurrentLocation();
 });
 
 // Prevent zooming on double-tap
