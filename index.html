@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons.min.css">
+</head>
+<body>
+    <div class="particles" id="particles-js"></div>
+    <div class="container">
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="city-input" placeholder="Search for a city...">
+                <button id="search-btn">
+                    <i class="wi wi-direction-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="weather-card">
+            <div class="weather-main">
+                <div class="weather-icon" id="weather-icon">
+                    <i class="wi wi-day-sunny"></i>
+                </div>
+                <div class="weather-temp" id="temperature">--<span>°C</span></div>
+                <div class="weather-desc" id="weather-desc">--</div>
+                <div class="location" id="city-name">--</div>
+            </div>
+            
+            <div class="weather-details">
+                <div class="detail">
+                    <div class="detail-icon">
+                        <i class="wi wi-humidity"></i>
+                    </div>
+                    <div class="detail-info">
+                        <div class="detail-value" id="humidity">--%</div>
+                        <div class="detail-label">Humidity</div>
+                    </div>
+                </div>
+                <div class="detail">
+                    <div class="detail-icon">
+                        <i class="wi wi-strong-wind"></i>
+                    </div>
+                    <div class="detail-info">
+                        <div class="detail-value" id="wind-speed">-- km/h</div>
+                        <div class="detail-label">Wind Speed</div>
+                    </div>
+                </div>
+                <div class="detail">
+                    <div class="detail-icon">
+                        <i class="wi wi-barometer"></i>
+                    </div>
+                    <div class="detail-info">
+                        <div class="detail-value" id="pressure">-- hPa</div>
+                        <div class="detail-label">Pressure</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="forecast" id="forecast">
+            <!-- Forecast items will be added by JavaScript -->
+        </div>
+    </div>
+    
+    <!-- Particles.js for background effect -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
