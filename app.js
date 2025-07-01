@@ -9,13 +9,39 @@ const weatherDesc = document.getElementById('weather-desc');
 const humidity = document.getElementById('humidity');
 const windSpeed = document.getElementById('wind-speed');
 
-// Event Listeners
+// Add event listeners with touch support
+searchBtn.addEventListener('touchstart', () => {
+    searchBtn.style.transform = 'scale(0.95)';
+});
+
+searchBtn.addEventListener('touchend', () => {
+    searchBtn.style.transform = '';
+});
+
+// Search button click handler
 searchBtn.addEventListener('click', searchWeather);
-cityInput.addEventListener('keypress', (e) => {
+
+// Handle search on Enter key
+cityInput.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
         searchWeather();
     }
 });
+
+// Prevent zooming on double-tap
+document.documentElement.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+}, { passive: false });
+
+// Prevent zooming on input focus on mobile
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (event) => {
+    const now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
 
 // Weather code to description mapping
 const weatherCodes = {
