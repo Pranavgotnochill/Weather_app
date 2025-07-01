@@ -8,6 +8,7 @@ const temperature = document.getElementById('temperature');
 const weatherDesc = document.getElementById('weather-desc');
 const humidity = document.getElementById('humidity');
 const windSpeed = document.getElementById('wind-speed');
+const pressure = document.getElementById('pressure');
 
 // Add event listeners with touch support
 searchBtn.addEventListener('touchstart', () => {
@@ -102,14 +103,14 @@ async function getCoordinates(city) {
 async function getWeatherByLocation(city) {
     try {
         // Show loading state
-        updateUI('Loading...', '--', '--', '--', '--');
+        updateUI('Loading...', '--', '--', '--', '--', '--');
         
-        // First get coordinates for the city
+        // First, get coordinates for the city
         const { latitude, longitude, name, country } = await getCoordinates(city);
         
-        // Then get weather data
+        // Then, get weather data with pressure included
         const response = await fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m&temperature_unit=celsius&windspeed_unit=kmh&timezone=auto`
+            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m,surface_pressure&temperature_unit=celsius&windspeed_unit=kmh&timezone=auto`
         );
         
         if (!response.ok) {
@@ -117,27 +118,27 @@ async function getWeatherByLocation(city) {
         }
         
         const data = await response.json();
-        
-        // Get current weather data
         const current = data.current_weather;
         const weatherDesc = weatherCodes[current.weathercode] || 'Unknown';
         
-        // Get additional data from hourly (for humidity)
+        // Get humidity and pressure from hourly data (first hour)
         const humidity = data.hourly.relativehumidity_2m[0];
+        const pressureHpa = Math.round(data.hourly.surface_pressure[0]); // Round to nearest integer
         
-        // Update UI with weather data (pass temperature as number, we'll format it in updateUI)
+        // Update UI with weather data
         updateUI(
             `${name}, ${country}`,
-            Math.round(current.temperature * 10) / 10, // Keep one decimal place for temperature
+            Math.round(current.temperature * 10) / 10,
             weatherDesc,
             humidity,
-            Math.round(current.windspeed)
+            Math.round(current.windspeed),
+            pressureHpa
         );
         
     } catch (error) {
         console.error('Error fetching weather data:', error);
         alert(error.message || 'An error occurred. Please try again.');
-        updateUI('--', '--', '--', '--', '--');
+        updateUI('--', '--', '--', '--', '--', '--');
     }
 }
 
@@ -151,15 +152,13 @@ function searchWeather() {
     }
 }
 
-// Function to update the UI with weather data
-function updateUI(city, temp, desc, hum, wind) {
+// Function to update UI
+function updateUI(city, temp, desc, hum, wind, press) {
     cityName.textContent = city;
-    // Only show the number, the °C is already in the HTML
     temperature.textContent = temp === '--' ? '--' : temp;
     weatherDesc.textContent = desc;
     humidity.textContent = hum === '--' ? '--%' : `${hum}%`;
     windSpeed.textContent = wind === '--' ? '-- km/h' : `${wind} km/h`;
-    
-    // Update the document title
+    pressure.textContent = press === '--' ? '-- hPa' : `${press} hPa`;
     document.title = city === '--' ? 'Weather App' : `${city} - Weather App`;
 }
